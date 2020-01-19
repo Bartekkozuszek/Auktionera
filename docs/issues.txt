@@ -1,0 +1,2 @@
+1. Ramverket Instant forska hur man ändrar formatet så den ej visar millisekunder
+2. Get auctions ska bara visa inprogress

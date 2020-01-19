@@ -1,10 +1,15 @@
 package se.iths.auktionera.business.model;
 
 import lombok.*;
+import org.springframework.lang.Nullable;
 import se.iths.auktionera.persistence.entity.AuctionEntity;
+import se.iths.auktionera.persistence.entity.TagsEntity;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -13,13 +18,15 @@ import java.util.List;
 @Builder
 public class Auction {
 
-    private long id;
-    private String tags; //for the moment changed to String, should be changed into List or own Object
+    private long auctionId;
+    private String category;
+    private List<String> tags = new ArrayList<>();
     private String description;
     private User seller;
+
+    @Nullable
     private User buyer;
-    private Review sellerReview;
-    private Review buyerReview;
+
     private AuctionState auctionState;
     private Instant endsAt;
     private Instant createdAt;
@@ -32,32 +39,37 @@ public class Auction {
     private DeliveryType deliveryType;
 
     public Auction(AuctionEntity auctionEntity) {
-        this.id = auctionEntity.getId();
-        this.tags = auctionEntity.getTags();
+        this.auctionId = auctionEntity.getId();
+        this.category = auctionEntity.getCategory().getCategoryTitle();
+        this.tags = convertToList(auctionEntity.getTags());
         this.description = auctionEntity.getDescription();
         this.seller = User.builder()
                 .id(auctionEntity.getSeller().getId())
                 .userName(auctionEntity.getSeller().getUserName())
-                .createdAt(auctionEntity.getSeller().getCreatedAt()).build();
+                .createdAt(auctionEntity.getSeller().getCreatedAt())
+                .stats(UserStats.builder()
+                        .totalSales(auctionEntity.getSeller().getUserStats().getTotalSales())
+                        .totalPurchases(auctionEntity.getSeller().getUserStats().getTotalPurchases())
+                        .buyerRating(auctionEntity.getSeller().getUserStats().getBuyerRating())
+                        .sellerRating(auctionEntity.getSeller().getUserStats().getSellerRating())
+                        .build())
+                .build();
 
-        this.buyer = User.builder()
-                .id(auctionEntity.getBuyer().getId())
-                .userName(auctionEntity.getBuyer().getUserName())
-                .createdAt(auctionEntity.getBuyer().getCreatedAt()).build();
+        if (auctionEntity.getBuyer() != null) {
+            this.buyer = User.builder()
+                    .id(auctionEntity.getBuyer().getId())
+                    .userName(auctionEntity.getBuyer().getUserName())
+                    .createdAt(auctionEntity.getBuyer().getCreatedAt())
+                    .stats(UserStats.builder()
+                            .totalSales(auctionEntity.getBuyer().getUserStats().getTotalSales())
+                            .totalPurchases(auctionEntity.getBuyer().getUserStats().getTotalPurchases())
+                            .buyerRating(auctionEntity.getBuyer().getUserStats().getBuyerRating())
+                            .sellerRating(auctionEntity.getBuyer().getUserStats().getSellerRating())
+                            .build())
+                    .build();
+        }
 
-        this.sellerReview = Review.builder().auctionId(auctionEntity.getId()).seller(this.seller)
-                .reviewText(auctionEntity.getSellerReview().getReviewText())
-                .buyer(this.buyer).createdAt(auctionEntity.getCreatedAt())
-                .lastEditAt(auctionEntity.getSellerReview().getLastEditAt())
-                .rating(auctionEntity.getSellerReview().getRating()).build();
-
-        this.buyerReview = Review.builder().auctionId(auctionEntity.getId()).buyer(this.buyer)
-                .reviewText(auctionEntity.getBuyerReview().getReviewText())
-                .seller(this.seller).createdAt(auctionEntity.getCreatedAt())
-                .lastEditAt(auctionEntity.getBuyerReview().getLastEditAt())
-                .rating(auctionEntity.getBuyerReview().getRating()).build();
-
-        this.auctionState = (AuctionState) auctionEntity.getAuctionState();
+        this.auctionState = auctionEntity.getAuctionState();
         this.endsAt = auctionEntity.getEndsAt();
         this.createdAt = auctionEntity.getCreatedAt();
         this.currentBidAt = auctionEntity.getCurrentBidAt();
@@ -66,7 +78,11 @@ public class Auction {
         this.buyOutPrice = auctionEntity.getBuyOutPrice();
         this.minBidStep = auctionEntity.getMinBidStep();
         this.currentBid = auctionEntity.getCurrentBid();
-        this.deliveryType = (DeliveryType) auctionEntity.getDeliveryType();
+        this.deliveryType = auctionEntity.getDeliveryType();
+    }
+
+    public List<String> convertToList(Set<TagsEntity> tags){
+        return tags.stream().map(TagsEntity::getTag).collect(Collectors.toList());
     }
 }
 

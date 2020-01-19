@@ -10,6 +10,7 @@ public interface IUserService {
 
     List<User> getUsers(Map<String, String> filters, Map<String, String> sorters);
 
+    User getUserById(Long id);
 
-    User getUserById(String authId);
+    List<Auction> getAuctionsByUser(Map<String, String> filters, Map<String, String> sorters, Long id);
 }

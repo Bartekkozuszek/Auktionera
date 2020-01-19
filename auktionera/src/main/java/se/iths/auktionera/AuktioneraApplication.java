@@ -14,14 +14,20 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.List;
 
 @SpringBootApplication
+@EnableSwagger2
 public class AuktioneraApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AuktioneraApplication.class, args);
+
     }
 
 //    @Bean

@@ -1,3 +1,4 @@
+/*
 package se.iths.auktionera;
 
 import org.springframework.security.core.AuthenticationException;
@@ -22,3 +23,4 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         }
     }
 
+*/

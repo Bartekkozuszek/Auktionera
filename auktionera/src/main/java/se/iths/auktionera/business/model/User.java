@@ -13,4 +13,5 @@ public class User {
     private long id;
     private String userName;
     private Instant createdAt;
+    private UserStats stats;
 }

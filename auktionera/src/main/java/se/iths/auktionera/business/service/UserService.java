@@ -1,62 +1,72 @@
 package se.iths.auktionera.business.service;
 
 import org.springframework.stereotype.Service;
-import se.iths.auktionera.business.model.Account;
+import se.iths.auktionera.api.exception.NotFoundException;
+import se.iths.auktionera.business.model.Auction;
 import se.iths.auktionera.business.model.User;
+import se.iths.auktionera.business.model.UserStats;
 import se.iths.auktionera.persistence.entity.AccountEntity;
+import se.iths.auktionera.persistence.entity.AuctionEntity;
 import se.iths.auktionera.persistence.repo.AccountRepo;
+import se.iths.auktionera.persistence.repo.AuctionRepo;
 
-import javax.persistence.Id;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService{
 
     private final AccountRepo accountRepo;
+    private final AuctionRepo auctionRepo;
 
-    public UserService(AccountRepo accountRepo) {
+    public UserService(AccountRepo accountRepo, AuctionRepo auctionRepo) {
         this.accountRepo = accountRepo;
+        this.auctionRepo = auctionRepo;
     }
 
     @Override
     public List<User> getUsers(Map<String, String> filters, Map<String, String> sorters) {
         List<AccountEntity> accountFound = accountRepo.findAll();
         List<User> users = new ArrayList<>();
-        for (int i = 0; i < accountFound.size() ; i++) {
+        for (AccountEntity accountEntity : accountFound) {
             users.add(User.builder().
-                    id(accountFound.get(i).getId())
-                    .userName(accountFound.get(i).getUserName())
-                    .createdAt(accountFound.get(i).getCreatedAt())
+                    id(accountEntity.getId())
+                    .userName(accountEntity.getUserName())
+                    .createdAt(accountEntity.getCreatedAt())
+                    .stats(UserStats.builder()
+                            .totalPurchases(accountEntity.getUserStats().getTotalPurchases())
+                            .totalSales(accountEntity.getUserStats().getTotalSales())
+                            .sellerRating(accountEntity.getUserStats().getSellerRating())
+                            .buyerRating(accountEntity.getUserStats().getBuyerRating()).build())
                     .build());
         }
         return users;
     }
 
     @Override
-    public User getUserById(String id) {
-        AccountEntity accountEntity = accountRepo.findByAuthId(id);
-        User user = User.builder()
+    public User getUserById(Long id) {
+        AccountEntity accountEntity = accountRepo.findById(id).orElseThrow(() -> new NotFoundException("User with id: "
+                + id + " could not be found."));;
+
+        return User.builder()
                 .id(accountEntity.getId())
                 .userName(accountEntity.getUserName())
                 .createdAt(accountEntity.getCreatedAt())
+                .stats(UserStats.builder()
+                        .totalPurchases(accountEntity.getUserStats().getTotalPurchases())
+                        .totalSales(accountEntity.getUserStats().getTotalSales())
+                        .sellerRating(accountEntity.getUserStats().getSellerRating())
+                        .buyerRating(accountEntity.getUserStats().getBuyerRating())
+                        .build())
                 .build();
-        return user;
     }
-//
-//    @Override
-//    public List<User> getAuctionsByUser(Map<String, String> filters, Map<String, String> sorters, String authId) {
-//        List<AccountEntity> accountEntities = accountRepo.findAllById();
-//        List<User> users = new ArrayList<>();
-//        for (int i = 0; i < accountFound.size() ; i++) {
-//            users.add(User.builder().
-//                    id(accountFound.get(i).getId())
-//                    .userName(accountFound.get(i).getUserName())
-//                    .createdAt(accountFound.get(i).getCreatedAt())
-//                    .build());
-//        }
-//        return users;
 
+    @Override
+    public List<Auction> getAuctionsByUser(Map<String, String> filters, Map<String, String> sorters, Long id) {
+        AccountEntity entity = accountRepo.findById(id).orElseThrow(() -> new NotFoundException("No account with id: "
+                + id + " was found. Please insert a valid user id."));
+        List<AuctionEntity> auctionEntityList = auctionRepo.findAuctionsBySeller(entity);
+        return auctionEntityList.stream().map(Auction::new).collect(Collectors.toList());
+    }
 
 }

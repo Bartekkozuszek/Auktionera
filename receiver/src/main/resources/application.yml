@@ -1,0 +1,65 @@
+server:
+  port: 8081
+  error:
+    include-stacktrace: on_trace_param
+
+logging:
+  level:
+    root: WARN
+    org:
+      springframework:
+        boot:
+          web:
+            embedded:
+              tomcat:
+                TomcatWebServer: INFO
+
+
+    #org.springframework: WARN
+    #org.hibernate: ERROR
+    #org.springframework.web: ERROR
+    #org.springframework.security: ERROR
+#    org.springframework.boot.autoconfigure: DEBUG
+
+
+auktionera:
+  rabbitmq:
+    exchange: auktionera.exchange
+    queue: auktionera.queue
+    routing-key: auktionera.routingkey
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  jpa:
+    hibernate.ddl-auto: create
+    #generate-ddl: true
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/auktionera?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+    password: Pierdole86
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+
+
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          github:
+#            client-id: f4c8b1201d8579c9df03
+#            client-secret: 600733d18da1c2680f4a44b2ecae86c45a86bd3c
+#            google:
+#              client-id:
+#              client-secret:
+
+
+
+
+
+

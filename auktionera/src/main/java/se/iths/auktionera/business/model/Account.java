@@ -25,6 +25,11 @@ public class Account {
                 .id(ent.getId())
                 .userName(ent.getUserName())
                 .createdAt(ent.getCreatedAt())
+                .stats(UserStats.builder()
+                        .totalPurchases(ent.getUserStats().getTotalPurchases())
+                        .totalSales(ent.getUserStats().getTotalSales())
+                        .buyerRating(ent.getUserStats().getBuyerRating())
+                        .sellerRating(ent.getUserStats().getSellerRating()).build())
                 .build();
 
         this.email = ent.getEmail();

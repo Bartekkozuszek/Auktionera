@@ -6,7 +6,6 @@ import se.iths.auktionera.business.model.AccountRequest;
 import se.iths.auktionera.persistence.entity.AccountEntity;
 import se.iths.auktionera.persistence.repo.AccountRepo;
 
-import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -20,18 +19,15 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account getAccount(String authId) {
-        AccountEntity acc = accountRepo.findByAuthId(authId);
-        if (acc == null) {
-            acc = accountRepo.saveAndFlush(AccountEntity.builder().authId(authId).createdAt(Instant.now()).build());
-        }
+    public Account getAccount(String userName) {
+        AccountEntity acc = accountRepo.findByUserName(userName);
         return new Account(acc);
     }
 
 
     @Override
-    public Account updateAccount(String authId, AccountRequest accountRequest) {
-        AccountEntity acc = Objects.requireNonNull(accountRepo.findByAuthId(authId));
+    public Account updateAccount(String userName, AccountRequest accountRequest) {
+        AccountEntity acc = Objects.requireNonNull(accountRepo.findByUserName(userName));
 
         Optional.ofNullable(accountRequest.getUserName()).ifPresent(acc::setUserName);
         Optional.ofNullable(accountRequest.getEmail()).ifPresent(acc::setEmail);

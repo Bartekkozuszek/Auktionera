@@ -3,14 +3,14 @@ package se.iths.auktionera.persistence.entity;
 import lombok.*;
 import se.iths.auktionera.business.model.AuctionState;
 import se.iths.auktionera.business.model.DeliveryType;
-import se.iths.auktionera.business.model.Review;
-import se.iths.auktionera.business.model.User;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "auctions")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,12 +19,17 @@ import java.util.List;
 public class AuctionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, nullable = false, updatable = false)
-    private String tags;
+    @ManyToMany
+    @Column(updatable = false)
+    private Set<TagsEntity> tags = new HashSet<>();
+
     private String description;
+
+    @ManyToOne
+    private CategoryEntity category;
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
@@ -34,14 +39,9 @@ public class AuctionEntity {
     @JoinColumn(name = "buyer_id")
     private AccountEntity buyer;
 
-    @OneToOne
-    @JoinColumn(name = "sellerReview_id")
-    private ReviewEntity sellerReview;
+    @Enumerated(EnumType.STRING)
+    private AuctionState auctionState;
 
-    @OneToOne
-    @JoinColumn(name = "buyerReview_id")
-    private ReviewEntity buyerReview;
-    private Enum auctionState;
     private Instant endsAt;
     private Instant createdAt;
     private Instant currentBidAt;
@@ -50,7 +50,10 @@ public class AuctionEntity {
     private int buyOutPrice;
     private int minBidStep;
     private int currentBid;
-    private Enum deliveryType;
+    private long latestBidder;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryType deliveryType;
 }
 
 
